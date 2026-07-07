@@ -8,6 +8,7 @@ import re
 import sys
 import tempfile
 import uuid
+import random
 from datetime import datetime
 from typing import Optional
 
@@ -36,22 +37,190 @@ HEADERS_TEMPLATE = {
     "Referer": "https://myaadhaar.uidai.gov.in/",
 }
 
+# ===== BEST PROXIES (Selected from your list) =====
+PROXIES = [
+    # HTTP/HTTPS Proxies
+    {"url": "http://167.235.231.57:80", "type": "http"},
+    {"url": "http://91.107.182.124:84", "type": "http"},
+    {"url": "http://65.21.212.113:9050", "type": "http"},
+    {"url": "http://103.155.184.51:9898", "type": "http"},
+    {"url": "http://152.32.132.190:7890", "type": "http"},
+    {"url": "http://141.136.63.126:8080", "type": "http"},
+    {"url": "http://95.216.230.239:80", "type": "http"},
+    {"url": "http://138.197.68.35:4857", "type": "http"},
+    {"url": "http://142.111.48.56:6833", "type": "http"},
+    {"url": "http://103.48.69.170:83", "type": "http"},
+    {"url": "http://185.146.138.15:8080", "type": "http"},
+    {"url": "http://178.128.95.176:8080", "type": "http"},
+    {"url": "http://36.92.61.75:8080", "type": "http"},
+    {"url": "http://190.128.131.126:8080", "type": "http"},
+    {"url": "http://45.95.232.35:3128", "type": "http"},
+    {"url": "http://184.95.235.194:1080", "type": "http"},
+    {"url": "http://103.247.23.242:1111", "type": "http"},
+    {"url": "http://193.239.26.142:9000", "type": "http"},
+    {"url": "http://129.154.217.238:8080", "type": "http"},
+    {"url": "http://150.129.170.77:5678", "type": "http"},
+    {"url": "http://201.20.95.226:8080", "type": "http"},
+    {"url": "http://141.95.127.15:3128", "type": "http"},
+    {"url": "http://194.26.192.168:8080", "type": "http"},
+    {"url": "http://59.37.168.32:2000", "type": "http"},
+    {"url": "http://164.52.192.156:80", "type": "http"},
+    {"url": "http://145.223.46.50:5600", "type": "http"},
+    {"url": "http://94.43.164.242:8080", "type": "http"},
+    {"url": "http://8.221.141.88:221", "type": "http"},
+    {"url": "http://104.154.186.48:80", "type": "http"},
+    {"url": "http://103.181.255.105:8080", "type": "http"},
+    {"url": "http://103.137.35.2:80", "type": "http"},
+    {"url": "http://37.211.38.70:8080", "type": "http"},
+    {"url": "http://8.220.204.215:443", "type": "http"},
+    {"url": "http://152.53.137.180:1081", "type": "http"},
+    {"url": "http://31.220.78.244:80", "type": "http"},
+    {"url": "http://146.103.104.197:8888", "type": "http"},
+    {"url": "http://52.140.40.92:80", "type": "http"},
+    {"url": "http://104.207.46.117:3129", "type": "http"},
+    {"url": "http://159.223.126.209:9050", "type": "http"},
+    {"url": "http://118.163.120.181:58837", "type": "http"},
+    {"url": "http://36.93.163.219:8080", "type": "http"},
+    {"url": "http://181.78.20.14:999", "type": "http"},
+    {"url": "http://193.176.242.186:80", "type": "http"},
+    {"url": "http://197.221.234.149:80", "type": "http"},
+    {"url": "http://144.24.111.128:3129", "type": "http"},
+    {"url": "http://91.209.71.84:9080", "type": "http"},
+    {"url": "http://203.25.208.163:1145", "type": "http"},
+    {"url": "http://132.243.246.97:8443", "type": "http"},
+    {"url": "http://95.178.108.189:5678", "type": "http"},
+    {"url": "http://142.54.160.122:17053", "type": "http"},
+    {"url": "http://103.193.144.13:8080", "type": "http"},
+    {"url": "http://95.183.140.89:80", "type": "http"},
+    {"url": "http://209.50.169.191:3129", "type": "http"},
+    {"url": "http://41.220.16.214:80", "type": "http"},
+    {"url": "http://43.251.117.226:45787", "type": "http"},
+    {"url": "http://192.252.211.197:14921", "type": "http"},
+    {"url": "http://109.199.107.68:1080", "type": "http"},
+    {"url": "http://213.6.68.210:4145", "type": "http"},
+    {"url": "http://162.220.246.95:6379", "type": "http"},
+    {"url": "http://41.74.91.244:80", "type": "http"},
+    {"url": "http://101.255.158.173:1111", "type": "http"},
+    {"url": "http://189.222.40.79:999", "type": "http"},
+    {"url": "http://205.209.66.105:1080", "type": "http"},
+    {"url": "http://109.237.97.176:36090", "type": "http"},
+    {"url": "http://147.45.215.249:8443", "type": "http"},
+    {"url": "http://209.50.180.43:3129", "type": "http"},
+    {"url": "http://47.254.198.237:3128", "type": "http"},
+    {"url": "http://139.144.224.11:8080", "type": "http"},
+    {"url": "http://149.57.17.36:5504", "type": "http"},
+    {"url": "http://62.54.177.118:3128", "type": "http"},
+    {"url": "http://149.2.82.195:999", "type": "http"},
+    {"url": "http://47.250.159.65:1080", "type": "http"},
+    {"url": "http://85.237.207.223:50161", "type": "http"},
+    {"url": "http://5.78.83.87:8080", "type": "http"},
+    {"url": "http://190.14.240.133:999", "type": "http"},
+    {"url": "http://91.204.190.140:81", "type": "http"},
+    {"url": "http://184.178.172.14:4145", "type": "http"},
+    {"url": "http://177.136.86.229:999", "type": "http"},
+    {"url": "http://94.247.241.70:51006", "type": "http"},
+    {"url": "http://154.236.191.44:1981", "type": "http"},
+    {"url": "http://196.202.210.35:32650", "type": "http"},
+    {"url": "http://89.250.148.154:4145", "type": "http"},
+    {"url": "http://163.172.53.142:80", "type": "http"},
+    {"url": "http://192.227.131.241:6825", "type": "http"},
+    {"url": "http://31.59.20.28:6606", "type": "http"},
+    # SOCKS4 Proxies (as HTTP for compatibility)
+    {"url": "http://192.252.209.155:14455", "type": "http"},
+    {"url": "http://77.81.230.90:9050", "type": "http"},
+    {"url": "http://60.217.64.237:35292", "type": "http"},
+    {"url": "http://103.191.165.45:1080", "type": "http"},
+    {"url": "http://115.127.87.245:10800", "type": "http"},
+    {"url": "http://91.203.114.71:42905", "type": "http"},
+    {"url": "http://1.179.147.5:52210", "type": "http"},
+    {"url": "http://202.40.186.66:1088", "type": "http"},
+    {"url": "http://205.185.125.140:5556", "type": "http"},
+    {"url": "http://89.41.106.8:4145", "type": "http"},
+    {"url": "http://81.162.249.129:4153", "type": "http"},
+]
+
 # ===== CONVERSATION STATES =====
 AWAITING_MOBILE, AWAITING_NAME, AWAITING_CAPTCHA, AWAITING_OTP, AWAITING_DOWNLOAD_CAPTCHA, AWAITING_DOWNLOAD_OTP = range(6)
 
-# ===== ORIGINAL UIDAI FUNCTIONS (UNCHANGED) =====
+# ===== PROXY MANAGER =====
+_current_proxy_index = 0
+_failed_proxies = set()
+
+def get_next_proxy() -> str:
+    """Get the next working proxy with rotation."""
+    global _current_proxy_index
+    
+    # Try up to 3 proxies
+    for _ in range(3):
+        proxy = PROXIES[_current_proxy_index % len(PROXIES)]
+        _current_proxy_index += 1
+        proxy_url = proxy["url"]
+        
+        # Skip failed proxies
+        if proxy_url in _failed_proxies:
+            continue
+        
+        return proxy_url
+    
+    # If all proxies failed, reset and try again
+    _failed_proxies.clear()
+    return PROXIES[0]["url"]
+
+def mark_proxy_failed(proxy_url: str):
+    """Mark a proxy as failed."""
+    _failed_proxies.add(proxy_url)
+    log.warning(f"Proxy marked as failed: {proxy_url}")
+
+# ===== UIDAI API FUNCTIONS =====
 
 async def _req(method: str, path: str, headers: dict, payload: dict = None) -> dict:
-    """Make a request to UIDAI API - ORIGINAL WORKING VERSION."""
-    url = f"{BASE_URL}{path}"
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload, timeout=30)
-    if response.status_code != 200:
-        raise Exception(f"HTTP {response.status_code}: {response.text[:200]}")
-    return response.json()
+    """Make a request to UIDAI API with proxy rotation."""
+    max_retries = 10  # Try multiple proxies
+    last_error = None
+    
+    for attempt in range(max_retries):
+        proxy_url = get_next_proxy()
+        url = f"{BASE_URL}{path}"
+        
+        try:
+            async with httpx.AsyncClient(
+                proxy=proxy_url,
+                timeout=30.0,
+                follow_redirects=True,
+                limits=httpx.Limits(max_keepalive_connections=5)
+            ) as client:
+                response = await client.post(url, headers=headers, json=payload)
+                
+                if response.status_code == 200:
+                    # Success! Return the response
+                    return response.json()
+                elif response.status_code == 403:
+                    # Proxy is blocked by UIDAI
+                    mark_proxy_failed(proxy_url)
+                    log.warning(f"Proxy blocked (403): {proxy_url}")
+                    continue
+                else:
+                    log.warning(f"HTTP {response.status_code} with proxy {proxy_url}")
+                    if response.status_code >= 500:
+                        mark_proxy_failed(proxy_url)
+                        continue
+                    raise Exception(f"HTTP {response.status_code}: {response.text[:200]}")
+                    
+        except (httpx.ProxyError, httpx.ConnectError, httpx.TimeoutException) as e:
+            last_error = e
+            mark_proxy_failed(proxy_url)
+            log.warning(f"Proxy failed: {proxy_url} - {str(e)[:100]}")
+            continue
+        except Exception as e:
+            last_error = e
+            log.warning(f"Unexpected error with proxy {proxy_url}: {str(e)[:100]}")
+            continue
+    
+    # All proxies failed
+    raise Exception(f"All proxies failed. Last error: {last_error}")
 
 def _save_captcha(image_bytes: bytes, tag: str, user_id: str) -> str:
-    """Save captcha image to temp file - ORIGINAL WORKING VERSION."""
+    """Save captcha image to temp file and return path."""
     temp_dir = os.path.join(tempfile.gettempdir(), "uidai_captcha")
     os.makedirs(temp_dir, exist_ok=True)
     filename = f"captcha_{tag}_{user_id}_{datetime.now().strftime('%H%M%S')}.jpg"
@@ -61,7 +230,7 @@ def _save_captcha(image_bytes: bytes, tag: str, user_id: str) -> str:
     return filepath
 
 async def _generate_captcha(request_id: str, label: str, user_id: str) -> tuple:
-    """Generate captcha - ORIGINAL WORKING VERSION."""
+    """Generate captcha using proxy rotation."""
     headers = {
         **HEADERS_TEMPLATE,
         "Appid": "MYAADHAAR",
@@ -80,7 +249,7 @@ async def _generate_captcha(request_id: str, label: str, user_id: str) -> tuple:
     return transaction_id, image_path
 
 async def _send_otp(request_id: str, mobile: str, name: str, captcha_txn: str, captcha_text: str) -> str:
-    """Send OTP - ORIGINAL WORKING VERSION."""
+    """Send OTP using proxy rotation."""
     headers = {**HEADERS_TEMPLATE, "Appid": "MYAADHAAR", "X-Request-Id": request_id}
     payload = {
         "mobileNumber": mobile,
@@ -108,7 +277,7 @@ async def _send_otp(request_id: str, mobile: str, name: str, captcha_txn: str, c
     raise Exception("OTP failed after 3 attempts")
 
 async def _verify_otp(request_id: str, mobile: str, name: str, otp: str, otp_txn: str, captcha_txn: str, captcha_text: str) -> dict:
-    """Verify OTP - ORIGINAL WORKING VERSION."""
+    """Verify OTP using proxy rotation."""
     headers = {**HEADERS_TEMPLATE, "Appid": "MYAADHAAR", "X-Request-Id": request_id}
     payload = {
         "mobileNumber": mobile,
@@ -133,7 +302,7 @@ async def _verify_otp(request_id: str, mobile: str, name: str, otp: str, otp_txn
     }
 
 async def _send_download_otp(request_id: str, eid: str, captcha_txn: str, captcha_text: str) -> str:
-    """Send download OTP - ORIGINAL WORKING VERSION."""
+    """Send download OTP using proxy rotation."""
     headers = {**HEADERS_TEMPLATE, "Appid": "MYAADHAAR", "X-Request-Id": request_id}
     payload = {
         "eidNumber": eid,
@@ -152,7 +321,7 @@ async def _send_download_otp(request_id: str, eid: str, captcha_txn: str, captch
     raise Exception("Download OTP failed")
 
 async def _download_aadhaar(request_id: str, eid: str, otp: str, otp_txn: str) -> bytes:
-    """Download Aadhaar PDF - ORIGINAL WORKING VERSION."""
+    """Download Aadhaar PDF using proxy rotation."""
     headers = {
         **HEADERS_TEMPLATE,
         "Appid": "MYAADHAAR",
@@ -408,10 +577,30 @@ async def cancel(update: Update, context: CallbackContext) -> int:
     await update.message.reply_text("❌ Operation cancelled. Use /start to begin again.")
     return ConversationHandler.END
 
+# ===== FORCE STOP PREVIOUS INSTANCE =====
+async def force_stop_previous_instance():
+    """Force stop any previous bot instance to avoid Conflict error."""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"https://api.telegram.org/bot{BOT_TOKEN}/deleteWebhook",
+                json={"drop_pending_updates": True}
+            )
+            if response.status_code == 200:
+                log.info("✅ Previous instance stopped successfully")
+            else:
+                log.warning(f"⚠️ Could not stop previous instance: {response.text}")
+    except Exception as e:
+        log.warning(f"⚠️ Error stopping previous instance: {e}")
+
 # ===== MAIN FUNCTION =====
 
 def main():
     """Run the bot."""
+    # Force stop any previous instance
+    asyncio.run(force_stop_previous_instance())
+    
+    # Build application
     application = Application.builder().token(BOT_TOKEN).build()
 
     conversation_handler = ConversationHandler(
